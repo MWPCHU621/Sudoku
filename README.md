@@ -2,7 +2,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 This is a simple sudoku game maker created using React.
 
-##H Getting Started:
+## H2 Getting Started:
 
 fork or pull project, then
 
