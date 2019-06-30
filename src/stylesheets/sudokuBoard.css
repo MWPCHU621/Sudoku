@@ -1,0 +1,21 @@
+table,td {
+    border: 1px solid black;
+    background-color:white;
+    border-collapse: collapse;
+    padding: 10px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+}
+
+td:hover{
+   background-color: lightskyblue;
+}
+
+td.selected{
+    background-color: lightskyblue;
+}
+
+table{
+    table-layout: fixed;
+}
