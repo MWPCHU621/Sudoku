@@ -6,10 +6,11 @@ This is a simple sudoku game maker created using React.
 
 fork or pull project, then
 
-`
-    npm install
-    npm start
-`
+```
+npm install
+npm start
+```
+
 to start app in localhost:3000.
 
 
