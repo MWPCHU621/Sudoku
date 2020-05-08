@@ -7,6 +7,7 @@ import SudokuNumbers from './sudokuNumbers';
 
 //StyleSheet
 import '../stylesheets/sudokuBoard.css'
+import { isArray } from "util";
 
 class SudokuBoard extends Component {
     constructor(props) {
@@ -20,9 +21,8 @@ class SudokuBoard extends Component {
     }
 
     componentDidMount() {
-        let board = _.cloneDeep(Constants.SudokuBoard);
-        debugger;
-        //this.generateNewBoard(board);
+        let board = _.cloneDeep(Constants.SUDOKUBOARD);
+        this.generateNewBoard(board);
         this.setState({sudokuBoard:board});
     }
 
@@ -31,14 +31,15 @@ class SudokuBoard extends Component {
         return(
             <div>
                 <button className = "newGame_btn" onClick={this.onNewGameClick}>New Game</button>
-                <button className = "Solution_btn" >Solution</button>
+                <button className = "solution_btn" >Solution</button>
                 <table>
                     <tbody>
                         {this.state.sudokuBoard.map((row,i) => (
                                 <tr>
                                     {row.map((cell, j) => (
                                         <td id={i+""+j} 
-                                            className={targetCell===null ? null : targetCell.row+targetCell.column === i+""+j ? "selected" : null}
+                                            // className={targetCell===null ? null : targetCell.row+targetCell.column === i+""+j ? "selected" : null}
+                                            className = {this.getClassname(i,j)}
                                             onClick={this.onCellClick}>{cell}
                                         </td>
                                     ))}
@@ -47,15 +48,39 @@ class SudokuBoard extends Component {
                     </tbody>
                 </table>
 
-                <SudokuNumbers className="AvailableNumbers" onClick={this.onNumberClick}/>
+                <SudokuNumbers className="availableNumbers" onClick={this.onNumberClick}/>
             </div> 
         )
+    }
+
+    getClassname = (row,col) => {
+        let {targetCell} = this.state;
+        let className = "";
+        
+        if(row === 2 || row === 5) {
+            className += "bottomThick ";
+        }
+
+        if(col === 2 || col === 5) {
+            className += " rightThick ";
+        }
+
+
+        if(!(targetCell === null)) {
+            if(targetCell.row+targetCell.column === row + "" + col) {
+                className += "selected";
+            }
+        }
+
+        return className;
+
     }
 
     onCellClick = (e) => {
         let cellpos = e.target.id;
 
         this.setState({targetCell: {row: cellpos[0], column: cellpos[1]}});
+        console.log(this.state.targetCell);
     }
 
     onNumberClick = (e) => {
@@ -85,32 +110,56 @@ class SudokuBoard extends Component {
 
     onNewGameClick = (e) => {
         e.preventDefault();
-        let board = _.cloneDeep(Constants.SudokuBoard);
+        let board = _.cloneDeep(Constants.SUDOKUBOARD);
         this.setState({
             sudokuBoard: board, 
             targetCell:null
         });
+
+        this.generateNewBoard(board);
     }
 
     generateNewBoard = (board) => {
-        debugger;
-        this.backtrackAlgo(board);
+        let row = 0;
+        let col = 0;
+        this.backtrackAlgo(board, row, col);
     }
 
-    backtrackAlgo = (board) => {
-       
-    }
+    backtrackAlgo = (board, row, col) => {
 
-    generateValidNumber = (usedNum) => {
-        let genNum = RandNum();
-        //generate a number that hasn't been used before.
-        while(usedNum.includes(genNum) && usedNum.length < 9){
-            genNum = RandNum();
+    //    for(let i=0; i<9; i++) {
+    //        for(let j=0; j<9; j++) {
+    //             let validNumbers = this.findAllValidNumbers(i, j, board);
+    //             if(this.boardCheck())
+    //        }
+    //    }
+
+
+
+        let validNumbers = this.findAllValidNumbers(row, col, board); // find all valid numbers for that cell.
+        if(validNumbers.length == 0) return false;
+        else {
+            board[row][col] = validNumbers[0];
+            if(this.boardCheck(board, row, col)) {
+                if(row == 8) {
+                    if(col == 8) return true; // in this case we have reached the end of the board.
+                    else {
+                        this.backtrackAlgo(board, row, col+1);
+                    }
+                }
+                else {
+                    if(col == 8) { //if it has reached the end of the row, needs to move to the beginning of the next row
+                        this.backtrackAlgo(board, row+1, 0); // row + 1 will move the row down, and setting 0 as the column will move it back to the beginning of the row.
+                    }else {
+                        this.backtrackAlgo(board, row, col+1);
+                    }
+                    
+                }
+            }
         }
 
-        return genNum;
-    }
 
+    }
 
     // #region CHECK FUNCTIONS
 
@@ -159,8 +208,8 @@ class SudokuBoard extends Component {
         return true;
     }
 
-    checkSurrounding = (board, cellRow, cellCol)=> {
-        //debugger;
+    checkSurrounding = (board, cellRow, cellCol) => {
+
         let rowLimit = 0;
         let colLimit = 0;
         if(cellRow >= 0 && cellRow <= 2) {
@@ -201,6 +250,40 @@ class SudokuBoard extends Component {
     }
 
     // #endregion
+
+    // #region HELPER FUNCTIONS
+
+    shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+
+        return array;
+    }
+
+    findAllValidNumbers = (cellRow, cellCol, board) => {
+
+        let validNumbers = Constants.SUDOKUNUMBERS.filter(num => this.testNum(num, cellRow, cellCol, board));
+
+        return this.shuffleArray(validNumbers);
+   
+    }
+
+
+    testNum = (num, cellRow, cellCol, board) => {
+
+        board[cellRow][cellCol] = num; //temporarily set the cell value as num.
+
+        let result = this.boardCheck(board, cellRow, cellCol); //checks if the value is valid in that cell.
+
+        board[cellRow][cellCol] = ""; //reverts the temporary cell value.
+
+        return result;
+    }
+
+    // #endregion
+
 }
 
 export default SudokuBoard;
