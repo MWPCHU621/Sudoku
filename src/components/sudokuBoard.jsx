@@ -73,7 +73,6 @@ class SudokuBoard extends Component {
         }
 
         return className;
-
     }
 
     onCellClick = (e) => {
@@ -97,7 +96,6 @@ class SudokuBoard extends Component {
         if(!this.boardCheck(tempBoard, targetCell.row, targetCell.column)) {
             //resets the cell to empty string because of invalid number
             tempBoard[targetCell.row][targetCell.column] = "";
-
 
 
             alert("invalid number");
@@ -126,15 +124,7 @@ class SudokuBoard extends Component {
     }
 
     backtrackAlgo = (board, row, col) => {
-
-    //    for(let i=0; i<9; i++) {
-    //        for(let j=0; j<9; j++) {
-    //             let validNumbers = this.findAllValidNumbers(i, j, board);
-    //             if(this.boardCheck())
-    //        }
-    //    }
-
-
+        debugger;
 
         let validNumbers = this.findAllValidNumbers(row, col, board); // find all valid numbers for that cell.
         if(validNumbers.length == 0) return false;
@@ -287,41 +277,3 @@ class SudokuBoard extends Component {
 }
 
 export default SudokuBoard;
-
-
-
-
-
- // debugger;
-        // for(let i=0; i<9; i++) {
-        //     for(let j=0; j<9; j++) {
-        //         let usedNum = [];
-        //         let numToInsert = this.generateValidNumber(usedNum);
-        //         board[i][j] = numToInsert;
-        //         let validInput = true;
-        //         while(!this.boardCheck(board, i, j) && usedNum.length < 9) {
-        //             board[i][j] = "";
-
-        //             if(!usedNum.includes(numToInsert)) {
-        //                 usedNum.push(numToInsert);
-        //             }
-                    
-        //             if(usedNum.length === 9) {
-        //                 validInput = false;
-        //             }
-
-        //             numToInsert = this.generateValidNumber(usedNum);
-        //             board[i][j] = numToInsert;
-        //         }
-
-        //         if(!validInput) {
-        //             if(j === 0) {
-        //                 i--;
-        //                 j = 7;
-        //             } else {
-        //                 j-=2;
-        //             }
-        //         }
-        //         console.log(board);
-        //     }
-        // }
