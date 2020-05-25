@@ -23,7 +23,7 @@ class SudokuBoard extends Component {
     componentDidMount() {
         let board = _.cloneDeep(Constants.SUDOKUBOARD);
         this.generateNewBoard(board);
-        this.setState({sudokuBoard:board});
+        this.setState({sudokuBoard:board, solution:board});
     }
 
     render() {
@@ -118,37 +118,62 @@ class SudokuBoard extends Component {
     }
 
     generateNewBoard = (board) => {
-        let row = 0;
-        let col = 0;
-        this.backtrackAlgo(board, row, col);
+        this.backtrackAlgo(board); 
+
     }
 
-    backtrackAlgo = (board, row, col) => {
+    backtrackAlgo = (board) => {
         debugger;
 
-        let validNumbers = this.findAllValidNumbers(row, col, board); // find all valid numbers for that cell.
-        if(validNumbers.length == 0) return false;
-        else {
-            board[row][col] = validNumbers[0];
-            if(this.boardCheck(board, row, col)) {
-                if(row == 8) {
-                    if(col == 8) return true; // in this case we have reached the end of the board.
-                    else {
-                        this.backtrackAlgo(board, row, col+1);
-                    }
-                }
-                else {
-                    if(col == 8) { //if it has reached the end of the row, needs to move to the beginning of the next row
-                        this.backtrackAlgo(board, row+1, 0); // row + 1 will move the row down, and setting 0 as the column will move it back to the beginning of the row.
-                    }else {
-                        this.backtrackAlgo(board, row, col+1);
-                    }
-                    
+        let row = 0;
+        if ( row === 9 ) {
+            return;
+        } else {
+            let hasValidRow = this.fillRow(board, row, 0);
+            while(row < 8) {
+                if ( !hasValidRow ) {
+                    row--;
+                    this.fillRow(board, row, 0);
+                } else {
+                    row++;
+                    this.fillRow(board, row, 0);
                 }
             }
+
         }
+    }
+
+    fillRow = (board, row, col) => {
+        debugger;
 
 
+        let validNumbers = this.findAllValidNumbers(board, row, col); // find all valid numbers for that cell.
+        let validNumLength = validNumbers.length;
+
+        if(validNumLength === 0) return false;
+        else {
+            let index = 0;
+            board[row][col] = validNumbers[index];
+            if(col === 8) return true;
+            else {
+                let validInput = this.fillRow(board, row, col+1);
+                while(index < validNumLength-1) {
+                    if(!validInput) {
+                        index++;
+                        board[row][col] = validNumbers[index];
+                        validInput = this.fillRow(board, row, col+1);
+                    } else break;
+                }
+                if(!validInput) { 
+                    board[row][col] = ""; //need to set cell to empty in order to not affect the findAllValidNumber function.
+                } else return validInput;
+            }
+        } 
+    }
+
+
+    removeCells = (board) => {
+        
     }
 
     // #region CHECK FUNCTIONS
@@ -252,7 +277,7 @@ class SudokuBoard extends Component {
         return array;
     }
 
-    findAllValidNumbers = (cellRow, cellCol, board) => {
+    findAllValidNumbers = (board, cellRow, cellCol) => {
 
         let validNumbers = Constants.SUDOKUNUMBERS.filter(num => this.testNum(num, cellRow, cellCol, board));
 
@@ -263,13 +288,26 @@ class SudokuBoard extends Component {
 
     testNum = (num, cellRow, cellCol, board) => {
 
+        let temp = board[cellRow][cellCol];
         board[cellRow][cellCol] = num; //temporarily set the cell value as num.
 
         let result = this.boardCheck(board, cellRow, cellCol); //checks if the value is valid in that cell.
 
-        board[cellRow][cellCol] = ""; //reverts the temporary cell value.
+        board[cellRow][cellCol] = temp; //reverts the temporary cell value.
 
         return result;
+    }
+
+    genRandNum = () => {
+        return Math.floor(Math.random() * (30 - 10 + 1) + 10);
+    }
+
+    checkNextCellValidNumbers = (board, currRow, currCol, nextRow, nextCol) => {
+        let validNumArray = this.findAllValidNumbers(board, nextRow, nextCol);
+        let validNumArrayLength = validNumArray.length;
+        if(validNumArrayLength !== 9 - currCol + 1) return false;
+
+        return true;
     }
 
     // #endregion
